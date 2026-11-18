@@ -30,4 +30,6 @@ readelf -d build/linked
 readelf -d build/runtime
 ```
 
-Команда `make check` требует `strace`, сверяет результаты двух запусков и сохраняет трассы `build/linked.trace` и `build/runtime.trace` вместе с файлами вывода `build/linked.log` и `build/runtime.log`. В [отчёте PDF](report/report.pdf) разобраны ключевые строки обеих трасс. Команда `make report` пересобирает PDF при наличии XeLaTeX, пакетов LaTeX для русского языка и шрифтов Liberation.
+Команда `make check` требует `strace`, сверяет результаты двух запусков и сохраняет полные трассы `build/linked.trace` и `build/runtime.trace` вместе с файлами вывода `build/linked.log` и `build/runtime.log`. В [отчёте PDF](report/report.pdf) разобраны ключевые строки, а в приложении Б приведены обе трассы целиком.
+
+Для `make report` нужны XeLaTeX, пакеты LaTeX для русского языка и шрифты CMU Serif и CMU Typewriter Text (пакет `fonts-cmu` в Ubuntu). С полным набором пакетов шаблона доступна также сборка через `make report LATEX=pdflatex`.

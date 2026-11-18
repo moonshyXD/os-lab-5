@@ -1,11 +1,14 @@
-TEX = xelatex
+LATEX ?= xelatex
 
-.PHONY: all clean
+.PHONY: all clean xelatex
 all: report.pdf
 
-report.pdf: report.tex preamble.tex titlepage.tex $(wildcard inc/*.txt) ../src/runtime.c ../src/contracts.h
-	$(TEX) -interaction=nonstopmode -halt-on-error report.tex
-	$(TEX) -interaction=nonstopmode -halt-on-error report.tex
+report.pdf: report.tex preamble.tex titlepage.tex Makefile $(wildcard inc/*.txt ../src/*.c ../src/*.h) ../Makefile
+	$(LATEX) -interaction=nonstopmode -halt-on-error report.tex
+	$(LATEX) -interaction=nonstopmode -halt-on-error report.tex
+
+xelatex:
+	$(MAKE) LATEX=xelatex
 
 clean:
-	rm -f report.aux report.log report.out
+	rm -f report.aux report.log report.out report.lol report.toc

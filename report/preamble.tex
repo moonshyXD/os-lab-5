@@ -1,16 +1,24 @@
 % ============================================================
 %  Оформление отчёта. Обычно здесь ничего менять не нужно.
-%  Сборка по умолчанию выполняется XeLaTeX.
+%  Собирается pdfLaTeX (по умолчанию, в т. ч. в Overleaf),
+%  XeLaTeX или LuaLaTeX.
 % ============================================================
 
 \usepackage{iftex}
 \ifPDFTeX
   \usepackage[T2A]{fontenc}
   \usepackage[utf8]{inputenc}
+  \usepackage{tempora}                 % Times-подобный шрифт с кириллицей
 \else
   \usepackage{fontspec}
-  \setmainfont{Liberation Serif}
-  \setmonofont{Liberation Mono}[Scale=MatchLowercase]
+  \IfFontExistsTF{Times New Roman}
+    {\setmainfont{Times New Roman}}
+    {\setmainfont{CMU Serif}}
+  \IfFontExistsTF{Consolas}
+    {\setmonofont{Consolas}[Scale=MatchLowercase]}
+    {\IfFontExistsTF{Courier New}
+      {\setmonofont{Courier New}}
+      {\setmonofont{CMU Typewriter Text}}}
 \fi
 \usepackage[english,russian]{babel}
 
@@ -36,6 +44,7 @@
 \usepackage{caption}
 \DeclareCaptionLabelSeparator{spacedendash}{~-- }
 \captionsetup{labelsep=spacedendash, font=small, singlelinecheck=false, justification=raggedright}
+\captionsetup[figure]{justification=centering, singlelinecheck=true}
 \captionsetup[table]{position=top, skip=4pt}
 \DeclareCaptionType[fileext=lol]{listing}[Листинг][Листинги]
 \captionsetup[listing]{position=top, skip=4pt, hypcap=false}

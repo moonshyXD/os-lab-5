@@ -1,10 +1,11 @@
-1: 2641790 15:35:21.967070 execve("./build/linked", ["./build/linked"], 0x7ffe1e30fc78 /* 88 vars */) = 0 <0.004678>
-3: 2641790 15:35:21.975813 openat(AT_FDCWD<$LAB>, "$LAB/build/libforward.so", O_RDONLY|O_CLOEXEC) = 3<$LAB/build/libforward.so> <0.001783>
-5: 2641790 15:35:21.980268 mmap(NULL, 16408, PROT_READ, MAP_PRIVATE|MAP_DENYWRITE, 3<$LAB/build/libforward.so>, 0) = 0x7436dd415000 <0.000028>
-6: 2641790 15:35:21.980530 mmap(0x7436dd416000, 4096, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3<$LAB/build/libforward.so>, 0x1000) = 0x7436dd416000 <0.000938>
-9: 2641790 15:35:21.985403 close(3<$LAB/build/libforward.so>) = 0 <0.000109>
-35: 2641790 15:35:22.013964 read(0<pipe:[14559435]>, "1 0 0.5\n2 1 100\n", 4096) = 16 <0.000050>
-36: 2641790 15:35:22.014988 write(1<$LAB/build/linked.log>, "-0.24483487\n", 12) = 12 <0.000752>
-37: 2641790 15:35:22.017843 write(1<$LAB/build/linked.log>, "25\n", 3) = 3 <0.001164>
-38: 2641790 15:35:22.019943 read(0<pipe:[14559435]>, "", 4096) = 0 <0.000061>
-39: 2641790 15:35:22.025345 +++ exited with 0 +++
+1: 2729616 15:44:11.552183 execve("./build/linked", ["./build/linked"], 0x7ffe1d2764f0 /* 88 vars */) = 0 <0.006091>
+10: 2729616 15:44:11.570909 openat(AT_FDCWD<$LAB>, "$LAB/build/libforward.so", O_RDONLY|O_CLOEXEC) = 3<$LAB/build/libforward.so> <0.001638>
+13: 2729616 15:44:11.576939 mmap(NULL, 16408, PROT_READ, MAP_PRIVATE|MAP_DENYWRITE, 3<$LAB/build/libforward.so>, 0) = 0x7b80c606c000 <0.000134>
+14: 2729616 15:44:11.578028 mmap(0x7b80c606d000, 4096, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3<$LAB/build/libforward.so>, 0x1000) = 0x7b80c606d000 <0.000077>
+17: 2729616 15:44:11.586344 close(3<$LAB/build/libforward.so>) = 0 <0.000068>
+58: 2729616 15:44:11.627824 read(0<pipe:[14667937]>, "1 0 0.5\n2 1 100\n", 4096) = 16 <0.000062>
+60: 2729616 15:44:11.632335 write(1<$LAB/build/linked.log>, "-0.24483487\n", 12) = 12 <0.000532>
+61: 2729616 15:44:11.634448 write(1<$LAB/build/linked.log>, "25\n", 3) = 3 <0.000736>
+62: 2729616 15:44:11.638148 read(0<pipe:[14667937]>, "", 4096) = 0 <0.000081>
+63: 2729616 15:44:11.639113 exit_group(0)   = ?
+64: 2729616 15:44:11.642796 +++ exited with 0 +++

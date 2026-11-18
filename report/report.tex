@@ -10,25 +10,70 @@
 \begin{document}
 \input{titlepage}
 
-\section{Цель работы}
-Научиться создавать динамические библиотеки и использовать их двумя способами: связывать исполняемый файл с библиотекой при сборке и явно загружать библиотеку во время работы программы.
+\section{Условие}
+\textbf{Цель работы.} Научиться создавать динамические библиотеки, связывать программу с библиотекой при сборке и явно загружать библиотеку во время исполнения.
 
-\section{Описание решения}
-Вариант 9 включает функцию 2 (производная $\cos x$) и функцию 3 (число простых на включительном отрезке $[A,B]$). Обе библиотеки экспортируют функции с одинаковыми сигнатурами.
+\textbf{Задание.} Создать две библиотеки с одинаковыми контрактами и две программы. Первая связывается с одной библиотекой при сборке. Вторая загружает библиотеки по относительным путям и меняет реализацию командой \texttt{0}. Команды \texttt{1} и \texttt{2} вызывают соответствующие функции.
+
+\textbf{Вариант 9.} Функция 2 вычисляет производную $\cos x$ в точке $A$. Функция 3 подсчитывает простые числа на включительном отрезке $[A,B]$.
+
+\section{Метод решения}
+Первая библиотека вычисляет правую конечную разность $(\cos(A+h)-\cos(A))/h$ и ищет делители каждого числа $n$ от 2 до $n-1$. Вторая вычисляет центральную разность $(\cos(A+h)-\cos(A-h))/(2h)$ и использует сегментированное решето Эратосфена. Решето находит простые до $\lfloor\sqrt{B}\rfloor$, затем вычёркивает их кратные в блоках отрезка. В каждом блоке вычёркивание начинается с первого кратного, которое не меньше квадрата простого.
+
+\texttt{linked} вызывает функции \texttt{libforward.so}, подключённой при сборке. \texttt{runtime} получает адреса функций через \texttt{dlsym} и меняет реализацию после успешной загрузки обоих символов. Ошибка открытия новой библиотеки или поиска символа оставляет прежнюю реализацию доступной. При завершении программа закрывает текущую библиотеку.
+
+\section{Описание программы}
+\subsection{Структура файлов}
+\begin{table}[H]
+\caption{Файлы проекта}
+\begin{tabularx}{\linewidth}{|P{5cm}|L|}
+\hline
+\thead{Файл} & \thead{Назначение} \\ \hline
+\path{src/contracts.h} & Сигнатуры функций и таблица указателей. \\ \hline
+\path{src/forward.c}, \path{src/central.c} & Две реализации контрактов. \\ \hline
+\path{src/commands.c}, \path{src/commands.h} & Чтение, проверка и выполнение команд. \\ \hline
+\path{src/linked.c}, \path{src/runtime.c} & Связывание при сборке и явная загрузка соответственно. \\ \hline
+\path{Makefile} & Сборка библиотек и программ, проверка под трассировщиком. \\ \hline
+\end{tabularx}
+\end{table}
+
+\subsection{Основные типы данных и функции}
+\begin{listingblock}{Контракты обеих библиотек (contracts.h)}
 \inputcode[firstline=4,lastline=5]{../src/contracts.h}
+\end{listingblock}
+\texttt{struct Contracts} хранит два указателя с этими сигнатурами. \texttt{run\_commands} использует таблицу для обработки команд. Для \texttt{1 A deltaX} допустимы конечные числа и ненулевой шаг, угол задаётся в радианах. Для \texttt{2 A B} допустимы натуральные границы при $A\leq B$. При неверном вводе программа печатает сообщение в stderr и читает следующую строку.
 
-В первой реализации приближение производной равно $(\cos(A+h)-\cos(A))/h$. Для проверки числа $n$ перебираются делители от 2 до $n-1$ до первого делителя. Во второй реализации используется центральная разность $(\cos(A+h)-\cos(A-h))/(2h)$ и сегментированное решето Эратосфена. Решето сначала находит простые до $\lfloor\sqrt{B}\rfloor$. Затем оно вычёркивает их кратные в блоках отрезка, начиная с первого кратного в блоке, которое не меньше квадрата простого. Размер временного блока постоянен.
+\subsection{Используемые системные вызовы}
+Программа обращается к средствам загрузчика и стандартной библиотеки. В таблице приведены системные вызовы из сохранённых трасс Linux.
 
-Обе программы используют один обработчик строк. Команда \texttt{1 A deltaX} принимает конечные числа и ненулевой шаг, угол задаётся в радианах. Команда \texttt{2 A B} принимает натуральные границы, где $A\leq B$. Ошибка ввода сопровождается сообщением в stderr. Стоимость наивной проверки растёт с величиной чисел, поэтому широкие интервалы удобнее проверять после переключения на решето.
+\begin{table}[H]
+\caption{Системные вызовы в наблюдаемом запуске}
+\small
+\begin{tabularx}{\linewidth}{|P{7cm}|L|}
+\hline
+\thead{Вызов} & \thead{Назначение} \\ \hline
+\texttt{execve}, \texttt{exit\_group} & Запуск и завершение процесса. \\ \hline
+\texttt{openat}, \texttt{close}, \texttt{fstat}, \texttt{newfstatat}, \texttt{pread64} &
+Открытие и закрытие файлов, получение метаданных и чтение структур ELF по смещению. \\ \hline
+\texttt{mmap}, \texttt{mprotect}, \texttt{munmap}, \texttt{brk} &
+Отображения, права страниц, освобождение отображений и управление кучей. \\ \hline
+\texttt{read}, \texttt{write} & Чтение заголовков и ввода, запись результата. \\ \hline
+\texttt{access}, \texttt{getcwd}, \texttt{readlinkat} & Проверка пути и сведения о текущем каталоге или открытом файле. \\ \hline
+\texttt{arch\_prctl}, \texttt{set\_tid\_address}, \texttt{set\_robust\_list}, \texttt{rseq}, \texttt{prlimit64}, \texttt{getrandom} &
+Служебная инициализация загрузчика и libc в этой среде. \\ \hline
+\end{tabularx}
+\end{table}
 
-\texttt{linked} связывается с \texttt{libforward.so} при сборке. Компоновщик записывает зависимость в ELF, и загрузчик обрабатывает её при запуске. \texttt{runtime} открывает первую библиотеку через \texttt{dlopen} и переключает её командой \texttt{0}. \texttt{dlsym} получает адреса функций, а \texttt{dlerror} проверяет ошибку поиска. При ошибке загрузки новой библиотеки или поиска символа программа сообщает причину и сохраняет прежнюю реализацию. При выходе программа закрывает текущий дескриптор.
+\subsection{Ключевые фрагменты кода}
+Программа получает оба адреса из новой библиотеки, прежде чем закрыть прежнюю и обновить таблицу функций.
 
-\begin{listingblock}{Получение адресов функций и смена реализации в runtime.c}
+\begin{listingblock}{Получение адресов и смена реализации (runtime.c)}
 \inputcode[firstline=48,lastline=61,fontsize=\footnotesize]{../src/runtime.c}
 \end{listingblock}
 
 \clearpage
-\section{Результаты работы}
+\section{Результаты}
+Для сборки из корня проекта используется \texttt{make}. Команда \texttt{make check} запускает обе программы под трассировщиком и сравнивает вывод с ожидаемым.
 Для $A=0$ и $h=0{,}5$ истинное значение производной равно нулю. После переключения результат меняется с $-0{,}24483487$ на нуль. Обе реализации насчитывают 25 простых от 1 до 100. Возврат к первой библиотеке восстанавливает исходный результат производной.
 \inputterminal{inc/demo.txt}
 
@@ -37,29 +82,29 @@
 \clearpage
 \begingroup
 \setlength{\emergencystretch}{3em}
-\subsection{Загрузка и выгрузка библиотек в strace}
-В сохранённых запусках PID программы \texttt{linked} равен 2641790, а PID \texttt{runtime} --- 2641840. Полные журналы выбранных успешных вызовов содержат 39 и 67 строк соответственно. В таблице даны номера строк из этих журналов.
+\section{Демонстрация работы strace}
+В сохранённых запусках PID программы \texttt{linked} равен 2729616, а PID \texttt{runtime} --- 2729673. Полные журналы содержат 64 и 92 строки соответственно и приведены в приложении Б. В таблице даны номера строк из этих журналов.
 
 \begin{table}[H]
 \caption{Ключевые события в сохранённых трассах}
 \centering\small
 \begin{tabular}{|l|l|c|c|}\hline
 Программа & Событие & \texttt{openat}, \texttt{mmap} & \texttt{munmap} \\ \hline
-\texttt{linked} & Загрузка \texttt{libforward.so} до первого ввода & 3, 5 & \\ \hline
-\texttt{runtime} & Начальная загрузка \texttt{libforward.so} & 19, 21 & \\ \hline
-\texttt{runtime} & Первая команда \texttt{0}: переход на \texttt{libcentral.so} & 41, 43 & 49 \\ \hline
-\texttt{runtime} & Вторая команда \texttt{0}: возврат к \texttt{libforward.so} & 53, 55 & 61 \\ \hline
-\texttt{runtime} & Выход после EOF & & 65 \\ \hline
+\texttt{linked} & Загрузка \texttt{libforward.so} до первого ввода & 10, 13 & \\ \hline
+\texttt{runtime} & Начальная загрузка \texttt{libforward.so} & 33, 37 & \\ \hline
+\texttt{runtime} & Первая команда \texttt{0}: переход на \texttt{libcentral.so} & 61, 65 & 71 \\ \hline
+\texttt{runtime} & Вторая команда \texttt{0}: возврат к \texttt{libforward.so} & 75, 79 & 85 \\ \hline
+\texttt{runtime} & Выход после EOF & & 89 \\ \hline
 \end{tabular}
 \end{table}
 
-В \texttt{linked} зависимость \texttt{libforward.so} записана в \texttt{DT\_NEEDED}. Динамический загрузчик находит файл рядом с программой через \texttt{RUNPATH=\$ORIGIN}. Строки 3--9 показывают открытие файла, отображение сегментов и закрытие файлового дескриптора. Код библиотеки остаётся в памяти: первый \texttt{read(0, ...)} приходит только в строке 35. Результат проверки ELF сохранён в \path{inc/elf.txt}.
+В \texttt{linked} зависимость \texttt{libforward.so} записана в \texttt{DT\_NEEDED}. Динамический загрузчик находит файл рядом с программой через \texttt{RUNPATH=\$ORIGIN}. Строки 10--17 показывают открытие файла, отображение сегментов и закрытие файлового дескриптора. Код библиотеки остаётся в памяти: первый \texttt{read(0, ...)} приходит только в строке 58. Результат проверки ELF сохранён в \path{inc/elf.txt}.
 
-В \path{src/runtime.c} функция \texttt{load\_library} вызывает \texttt{dlopen}. Начальное открытие относительного пути видно в строке 19. В строке 39 \texttt{read(0, ...)} получает все команды из канала, а \texttt{getline} отдаёт их по одной. Первый \texttt{write} в строке 40 печатает результат правой разности.
+В \path{src/runtime.c} функция \texttt{load\_library} вызывает \texttt{dlopen}. Начальное открытие относительного пути видно в строке 33. В строке 58 \texttt{read(0, ...)} получает все команды из канала, а \texttt{getline} отдаёт их по одной. Первый \texttt{write} в строке 60 печатает результат правой разности.
 
-При первой команде \texttt{0} загрузчик отображает \texttt{libcentral.so}. После получения адресов двух функций через \texttt{dlsym} программа закрывает старую библиотеку. У \texttt{munmap} в строке 49 те же адрес и длина (16408 байт), что у отображения \texttt{libforward.so} в строке 21. Строка 50 подтверждает смену, затем печатаются 0 для центральной разности и 25 для решета.
+При первой команде \texttt{0} загрузчик отображает \texttt{libcentral.so}. После получения адресов двух функций через \texttt{dlsym} программа закрывает старую библиотеку. У \texttt{munmap} в строке 71 те же адрес и длина (16408 байт), что у отображения \texttt{libforward.so} в строке 37. Строка 72 подтверждает смену, затем печатаются 0 для центральной разности и 25 для решета.
 
-Вторая команда \texttt{0} загружает \texttt{libforward.so} снова. В строке 61 \texttt{munmap} снимает отображение \texttt{libcentral.so} из строки 43 длиной 16432 байта. В строке 64 \texttt{read(0, ...)} возвращает 0, что означает EOF. В строке 65 снимается последнее отображение \texttt{libforward.so}, а строка 67 показывает завершение с кодом 0.
+Вторая команда \texttt{0} загружает \texttt{libforward.so} снова. В строке 85 \texttt{munmap} снимает отображение \texttt{libcentral.so} из строки 65 длиной 16432 байта. В строке 88 \texttt{read(0, ...)} возвращает 0, что означает EOF. В строке 89 снимается последнее отображение \texttt{libforward.so}, а строка 92 показывает завершение с кодом 0.
 
 \texttt{dlopen}, \texttt{dlsym} и \texttt{dlclose} выполняются в пользовательском пространстве. \texttt{strace} показывает обращения загрузчика к ядру. Поиск \texttt{dlsym} читает уже отображённые таблицы ELF. В этом опыте \texttt{munmap} виден после \texttt{dlclose}, потому что закрывается последняя ссылка на библиотеку.
 
@@ -79,10 +124,58 @@ make check
 rg -n 'lib(forward|central)\.so|munmap\(|read\(0|exited with' \
   report/inc/strace-*-full.txt
 \end{terminal}
-Ключ \texttt{-f} добавляет PID в журнал, \texttt{-tt} показывает время начала вызова, \texttt{-T} --- его длительность, \texttt{-yy} подписывает дескрипторы, а \texttt{-z} оставляет успешные вызовы. После знака \texttt{=} указан результат. В сохранённых файлах \texttt{\$LAB} обозначает путь к проекту. PID, адреса и номера строк могут измениться при повторном запуске.
+Ключ \texttt{-f} добавляет PID в журнал, \texttt{-tt} показывает время начала вызова, \texttt{-T} --- его длительность, \texttt{-yy} подписывает дескрипторы. Журналы содержат все вызовы обоих прогонов, в том числе завершившиеся ошибкой. После знака \texttt{=} указан результат. В сохранённых файлах \texttt{\$LAB} обозначает путь к проекту. PID, адреса и номера строк могут измениться при повторном запуске.
 \par
 \endgroup
 
 \section{Выводы}
 При связывании во время сборки программе достаточно обычных вызовов функций, а наличие библиотеки проверяется загрузчиком при старте. При явной загрузке можно выбирать реализацию во время работы без пересборки программы. Для этого программа самостоятельно обрабатывает ошибки загрузки и поиска символов и управляет временем жизни дескриптора. При одинаковых входах реализация подсчёта не меняет результат, а разные формулы конечных разностей дают различное приближение производной.
+
+\appendixsection{А}{Исходный код программы}
+\begin{listingblock}{Файл \texttt{src/contracts.h}}
+\inputcode[fontsize=\footnotesize]{../src/contracts.h}
+\end{listingblock}
+
+\begin{listingblock}{Файл \texttt{src/forward.c}}
+\inputcode[fontsize=\footnotesize]{../src/forward.c}
+\end{listingblock}
+
+\begin{listingblock}{Файл \texttt{src/central.c}}
+\inputcode[fontsize=\footnotesize]{../src/central.c}
+\end{listingblock}
+
+\begin{listingblock}{Файл \texttt{src/commands.h}}
+\inputcode[fontsize=\footnotesize]{../src/commands.h}
+\end{listingblock}
+
+\begin{listingblock}{Файл \texttt{src/commands.c}}
+\inputcode[fontsize=\footnotesize]{../src/commands.c}
+\end{listingblock}
+
+\begin{listingblock}{Файл \texttt{src/linked.c}}
+\inputcode[fontsize=\footnotesize]{../src/linked.c}
+\end{listingblock}
+
+\begin{listingblock}{Файл \texttt{src/runtime.c}}
+\inputcode[fontsize=\footnotesize]{../src/runtime.c}
+\end{listingblock}
+
+\begin{listingblock}{Файл \texttt{Makefile}}
+\inputcode[fontsize=\footnotesize]{../Makefile}
+\end{listingblock}
+
+\begin{listingblock}{Файл \texttt{report/Makefile}}
+\inputcode[fontsize=\footnotesize]{Makefile}
+\end{listingblock}
+
+\appendixsection{Б}{Полный вывод strace}
+Включены все строки обеих трасс. При сохранении абсолютный путь к каталогу проекта обозначен как \texttt{\$LAB}.
+
+\begin{listingblock}{Полный журнал программы linked}
+\inputterminal[fontsize=\scriptsize]{inc/strace-linked-full.txt}
+\end{listingblock}
+
+\begin{listingblock}{Полный журнал программы runtime}
+\inputterminal[fontsize=\scriptsize]{inc/strace-runtime-full.txt}
+\end{listingblock}
 \end{document}

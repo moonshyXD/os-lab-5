@@ -22,7 +22,7 @@ $(BUILD)/linked: src/linked.c $(BUILD)/commands.o $(BUILD)/libforward.so
 $(BUILD)/runtime: src/runtime.c $(BUILD)/commands.o
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(WARNINGS) -std=c11 $(LDFLAGS) -o $@ $^ -ldl
 
-TRACE = strace -f -tt -T -yy -z -s 128 -e trace=execve,openat,read,mmap,mprotect,close,munmap,write,exit_group
+TRACE = strace -f -tt -T -yy -s 128
 
 check: all
 	printf '1 0 0.5\n2 1 100\n' | $(TRACE) -o $(BUILD)/linked.trace ./$(BUILD)/linked > $(BUILD)/linked.log
