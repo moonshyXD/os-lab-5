@@ -30,4 +30,4 @@ readelf -d build/linked
 readelf -d build/runtime
 ```
 
-[Отчёт в PDF](report/report.pdf) содержит команды для записи `strace` обеих программ и разбор загрузки, переключения и выгрузки библиотек. Команда `make report` пересобирает его при наличии XeLaTeX, пакетов LaTeX для русского языка и шрифтов Liberation.
+Команда `make check` требует `strace`, сверяет результаты двух запусков и сохраняет трассы `build/linked.trace` и `build/runtime.trace` вместе с файлами вывода `build/linked.log` и `build/runtime.log`. В [отчёте PDF](report/report.pdf) разобраны ключевые строки обеих трасс. Команда `make report` пересобирает PDF при наличии XeLaTeX, пакетов LaTeX для русского языка и шрифтов Liberation.
