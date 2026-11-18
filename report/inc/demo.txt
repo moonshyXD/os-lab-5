@@ -1,0 +1,20 @@
+$ printf "1 0 0.5\n2 1 100\n" | ./build/linked
+-0.24483487
+25
+
+$ ./build/runtime <<EOF
+1 0 0.5
+2 1 100
+0
+1 0 0.5
+2 1 100
+0
+1 0 0.5
+EOF
+-0.24483487
+25
+Active library: ./build/libcentral.so
+0
+25
+Active library: ./build/libforward.so
+-0.24483487

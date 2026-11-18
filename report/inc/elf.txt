@@ -1,0 +1,7 @@
+$ readelf -d build/linked | grep -E "NEEDED|RUNPATH"
+ 0x0000000000000001 (NEEDED)             Shared library: [libforward.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libc.so.6]
+ 0x000000000000001d (RUNPATH)            Library runpath: [$ORIGIN]
+
+$ readelf -d build/runtime | grep -E "NEEDED|RUNPATH"
+ 0x0000000000000001 (NEEDED)             Shared library: [libc.so.6]

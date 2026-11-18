@@ -1,0 +1,4 @@
+/build/
+/report/*.aux
+/report/*.log
+/report/*.out
