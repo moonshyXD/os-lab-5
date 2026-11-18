@@ -13,8 +13,7 @@ static void *library;
 static unsigned active_index;
 static struct Contracts contracts;
 
-static int close_library(void *handle)
-{
+static int close_library(void *handle) {
     if (dlclose(handle) != 0) {
         fprintf(stderr, "dlclose: %s\n", dlerror());
         return -1;
@@ -22,8 +21,7 @@ static int close_library(void *handle)
     return 0;
 }
 
-static void *find_symbol(void *handle, const char *name)
-{
+static void *find_symbol(void *handle, const char *name) {
     dlerror();
     void *symbol = dlsym(handle, name);
     const char *error = dlerror();
@@ -37,8 +35,7 @@ static void *find_symbol(void *handle, const char *name)
     return symbol;
 }
 
-static int load_library(unsigned index)
-{
+static int load_library(unsigned index) {
     void *candidate = dlopen(library_paths[index], RTLD_NOW | RTLD_LOCAL);
     if (candidate == NULL) {
         fprintf(stderr, "dlopen %s: %s\n", library_paths[index], dlerror());
@@ -62,8 +59,7 @@ static int load_library(unsigned index)
     return 0;
 }
 
-static int switch_library(void)
-{
+static int switch_library(void) {
     const int result = load_library(1U - active_index);
     if (result > 0) {
         fprintf(stderr, "Active library retained: %s\n", library_paths[active_index]);
@@ -79,8 +75,7 @@ static int switch_library(void)
     return 0;
 }
 
-int main(void)
-{
+int main(void) {
     if (load_library(0) != 0) {
         return EXIT_FAILURE;
     }

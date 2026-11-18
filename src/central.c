@@ -8,15 +8,13 @@
 enum { ROOT_LIMIT = 46340, BLOCK_SIZE = 32768 };
 _Static_assert(INT_MAX == 2147483647, "sieve requires 32-bit int");
 
-float Derivative(float A, float deltaX)
-{
+float Derivative(float A, float deltaX) {
     const double point = A;
     const double step = deltaX;
     return (float)((cos(point + step) - cos(point - step)) / (2.0 * step));
 }
 
-static void sieve_base(int limit, bool composite[])
-{
+static void sieve_base(int limit, bool composite[]) {
     for (int prime = 2; prime <= limit / prime; ++prime) {
         if (composite[prime]) {
             continue;
@@ -27,8 +25,7 @@ static void sieve_base(int limit, bool composite[])
     }
 }
 
-static int count_block(int64_t first, int64_t last, const bool base[])
-{
+static int count_block(int64_t first, int64_t last, const bool base[]) {
     bool composite[BLOCK_SIZE] = {false};
     for (int64_t prime = 2; prime * prime <= last; ++prime) {
         if (base[prime]) {
@@ -50,8 +47,7 @@ static int count_block(int64_t first, int64_t last, const bool base[])
     return count;
 }
 
-int PrimeCount(int A, int B)
-{
+int PrimeCount(int A, int B) {
     bool base[ROOT_LIMIT + 1] = {false};
     sieve_base((int)sqrt(B), base);
 

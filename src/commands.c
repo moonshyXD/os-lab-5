@@ -11,8 +11,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-static char *next_token(char **rest)
-{
+static char *next_token(char **rest) {
     char *start = *rest;
     while (isspace((unsigned char)*start)) {
         ++start;
@@ -28,16 +27,14 @@ static char *next_token(char **rest)
     return start;
 }
 
-static bool parse_float(const char *token, float *value)
-{
+static bool parse_float(const char *token, float *value) {
     char *end;
     errno = 0;
     *value = strtof(token, &end);
     return end != token && *end == '\0' && errno == 0 && isfinite(*value);
 }
 
-static bool parse_bound(const char *token, int *value)
-{
+static bool parse_bound(const char *token, int *value) {
     char *end;
     errno = 0;
     const long number = strtol(token, &end, 10);
@@ -48,8 +45,7 @@ static bool parse_bound(const char *token, int *value)
     return true;
 }
 
-static int execute(char *line, struct Contracts *contracts, int (*switch_library)(void))
-{
+static int execute(char *line, struct Contracts *contracts, int (*switch_library)(void)) {
     char *command = next_token(&line);
     if (*command == '\0') {
         return 0;
@@ -89,8 +85,7 @@ static int execute(char *line, struct Contracts *contracts, int (*switch_library
     return 0;
 }
 
-int run_commands(struct Contracts *contracts, int (*switch_library)(void))
-{
+int run_commands(struct Contracts *contracts, int (*switch_library)(void)) {
     char *line = NULL;
     size_t capacity = 0;
     int status = EXIT_SUCCESS;
