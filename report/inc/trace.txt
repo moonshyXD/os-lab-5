@@ -1,7 +1,0 @@
-$ printf "0\n0\n" | strace -e trace=openat,write ./build/runtime
-openat(AT_FDCWD, "./build/libforward.so", O_RDONLY|O_CLOEXEC) = 3
-openat(AT_FDCWD, "./build/libcentral.so", O_RDONLY|O_CLOEXEC) = 3
-write(1, "Active library: ./build/libcentr"..., 38) = 38
-openat(AT_FDCWD, "./build/libforward.so", O_RDONLY|O_CLOEXEC) = 3
-write(1, "Active library: ./build/libforwa"..., 38) = 38
-+++ exited with 0 +++

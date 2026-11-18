@@ -26,9 +26,8 @@ make
 
 ```sh
 printf '1 0 0.5\n2 1 100\n0\n1 0 0.5\n2 1 100\n' | ./build/runtime
-printf '0\n0\n' | strace -e trace=openat,write ./build/runtime
 readelf -d build/linked
 readelf -d build/runtime
 ```
 
-[Отчёт в PDF](report/report.pdf) содержит сравнение двух способов загрузки и фактические логи. Команда `make report` пересобирает его при наличии XeLaTeX, пакетов LaTeX для русского языка и шрифтов Liberation.
+[Отчёт в PDF](report/report.pdf) содержит команды для записи `strace` обеих программ и разбор загрузки, переключения и выгрузки библиотек. Команда `make report` пересобирает его при наличии XeLaTeX, пакетов LaTeX для русского языка и шрифтов Liberation.
