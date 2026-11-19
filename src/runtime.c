@@ -3,6 +3,7 @@
 #include <dlfcn.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 static const char *const library_paths[] = {
     "./build/libforward.so",
@@ -68,7 +69,15 @@ static int switch_library(void) {
     if (result < 0) {
         return -1;
     }
-    if (printf("Active library: %s\n", library_paths[active_index]) < 0) {
+    int written;
+    if (isatty(STDIN_FILENO)) {
+        written = printf(active_index == 0
+            ? "Реализация 1: правая разность и перебор делителей.\n"
+            : "Реализация 2: центральная разность и решето Эратосфена.\n");
+    } else {
+        written = printf("Active library: %s\n", library_paths[active_index]);
+    }
+    if (written < 0) {
         perror("stdout");
         return -1;
     }
