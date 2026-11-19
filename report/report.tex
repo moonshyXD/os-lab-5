@@ -33,7 +33,8 @@
 \path{src/forward.c}, \path{src/central.c} & Две реализации контрактов. \\ \hline
 \path{src/commands.c}, \path{src/commands.h} & Чтение, проверка и выполнение команд. \\ \hline
 \path{src/linked.c}, \path{src/runtime.c} & Связывание при сборке и явная загрузка соответственно. \\ \hline
-\path{Makefile} & Сборка библиотек и программ, проверка под трассировщиком. \\ \hline
+\path{Makefile} & Цели сборки, запуска, трассировки, отчёта и очистки. \\ \hline
+\path{src/Makefile} & Правила компиляции библиотек и программ. \\ \hline
 \end{tabularx}
 \end{table}
 
@@ -168,6 +169,10 @@ rg -n 'lib(forward|central)\.so|munmap\(|read\(0|exited with' \
 
 \begin{listingblock}{Файл \texttt{Makefile}}
 \inputcode[fontsize=\footnotesize]{../Makefile}
+\end{listingblock}
+
+\begin{listingblock}{Файл \texttt{src/Makefile}}
+\inputcode[fontsize=\footnotesize]{../src/Makefile}
 \end{listingblock}
 
 \begin{listingblock}{Файл \texttt{report/Makefile}}
