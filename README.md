@@ -32,6 +32,8 @@ readelf -d build/linked
 readelf -d build/runtime
 ```
 
-Команда `make check` требует `strace`, сверяет результаты двух запусков и сохраняет полные трассы `build/linked.trace` и `build/runtime.trace` вместе с файлами вывода `build/linked.log` и `build/runtime.log`. В [отчёте PDF](report/report.pdf) разобраны ключевые строки, а в приложении Б приведены обе трассы целиком.
+Для запуска под трассировщиком используй `make strace`. Откроется меню `runtime`, а системные вызовы запишутся в `build/runtime.trace`. Для первой программы используй `make strace PROGRAM=linked`. Её трасса появится в `build/linked.trace`. Повторный запуск перезаписывает файл трассы выбранной программы.
+
+После выхода через `q` посмотреть лог можно командой `less build/runtime.trace`. В приложении Б [отчёта PDF](report/report.pdf) приведены сохранённые трассы обеих программ.
 
 Для `make report` нужны XeLaTeX, пакеты LaTeX для русского языка и шрифты CMU Serif и CMU Typewriter Text (пакет `fonts-cmu` в Ubuntu). С полным набором пакетов шаблона доступна также сборка через `make report LATEX=pdflatex`.

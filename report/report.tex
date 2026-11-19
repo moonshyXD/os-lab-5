@@ -73,7 +73,8 @@
 
 \clearpage
 \section{Результаты}
-Для сборки из корня проекта используется \texttt{make}. Команда \texttt{make check} запускает обе программы под трассировщиком и сравнивает вывод с ожидаемым.
+Для сборки из корня проекта используется \texttt{make}. Цель \texttt{strace} запускает \texttt{runtime} под трассировщиком. Для первой программы задаётся \texttt{PROGRAM=linked}.
+
 Для $A=0$ и $h=0{,}5$ истинное значение производной равно нулю. После переключения результат меняется с $-0{,}24483487$ на нуль. Обе реализации насчитывают 25 простых от 1 до 100. Возврат к первой библиотеке восстанавливает исходный результат производной.
 \inputterminal{inc/demo.txt}
 
@@ -118,9 +119,14 @@
 
 \clearpage
 \subsection{Воспроизведение трассировки}
-Команда \texttt{make check} из корня проекта записывает журналы в \path{build/linked.trace} и \path{build/runtime.trace}, а вывод программ --- в файлы \path{build/linked.log} и \path{build/runtime.log}. Сохранённые журналы из отчёта лежат в \path{inc/strace-linked-full.txt} и \path{inc/strace-runtime-full.txt}. Найти в них нужные события с исходными номерами можно так:
+Цель \texttt{strace} записывает журнал системных вызовов в \path{build/linked.trace} или \path{build/runtime.trace}. При запуске из терминала вывод программы виден на экране. Для воспроизведения сохранённого сценария команды можно подать через \texttt{printf}, а вывод программы записать в отдельный файл.
 \begin{terminal}
-make check
+printf '1 0 0.5\n2 1 100\n' | make -s strace PROGRAM=linked > build/linked.log
+printf '1 0 0.5\n0\n1 0 0.5\n2 1 100\n0\n1 0 0.5\n' |
+  make -s strace > build/runtime.log
+\end{terminal}
+Сохранённые журналы из отчёта лежат в \path{inc/strace-linked-full.txt} и \path{inc/strace-runtime-full.txt}. Найти в них нужные события с исходными номерами можно следующей командой.
+\begin{terminal}
 rg -n 'lib(forward|central)\.so|munmap\(|read\(0|exited with' \
   report/inc/strace-*-full.txt
 \end{terminal}
