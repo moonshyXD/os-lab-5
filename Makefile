@@ -1,40 +1,29 @@
-CC ?= gcc
-CFLAGS ?= -O2
-WARNINGS = -Wall -Wextra -Werror -Wformat=2
-BUILD = build
-LIBS = $(BUILD)/libforward.so $(BUILD)/libcentral.so
-
+CFLAGS ?= -O2 -std=c11 -Wall -Wextra -Werror -Wformat=2
 PROGRAM ?= runtime
-TRACE = strace -f -tt -T -yy -s 128
 
-all: $(LIBS) $(BUILD)/linked $(BUILD)/runtime
-
+all: build/libforward.so build/libcentral.so build/linked build/runtime
 run: all
-	./$(BUILD)/$(PROGRAM)
-
+	./build/$(PROGRAM)
 strace: all
-	$(TRACE) -o $(BUILD)/$(PROGRAM).trace ./$(BUILD)/$(PROGRAM)
-
+	strace -f -tt -T -yy -s 128 -o build/$(PROGRAM).trace ./build/$(PROGRAM)
 report:
 	$(MAKE) -C report
-
 clean:
-	rm -rf $(BUILD)
+	rm -rf build
 	$(MAKE) -C report clean
-
 .PHONY: all run strace report clean
 
-$(BUILD):
-	mkdir -p $@
+build:
+	mkdir -p build
 
-$(BUILD)/lib%.so: src/%.c src/contracts.h | $(BUILD)
-	$(CC) $(CPPFLAGS) $(CFLAGS) $(WARNINGS) -std=c11 -fPIC -shared $(LDFLAGS) -Wl,-soname,$(@F) -o $@ $< -lm
+build/libforward.so: src/forward.c src/contracts.h | build
+	$(CC) $(CPPFLAGS) $(CFLAGS) -fPIC -shared $(LDFLAGS) -Wl,-soname,libforward.so -o build/libforward.so src/forward.c -lm
 
-$(BUILD)/commands.o: src/commands.c src/commands.h src/contracts.h | $(BUILD)
-	$(CC) $(CPPFLAGS) $(CFLAGS) $(WARNINGS) -std=c11 -Wpedantic -c -o $@ $<
+build/libcentral.so: src/central.c src/contracts.h | build
+	$(CC) $(CPPFLAGS) $(CFLAGS) -fPIC -shared $(LDFLAGS) -Wl,-soname,libcentral.so -o build/libcentral.so src/central.c -lm
 
-$(BUILD)/linked: src/linked.c $(BUILD)/commands.o $(BUILD)/libforward.so
-	$(CC) $(CPPFLAGS) $(CFLAGS) $(WARNINGS) -std=c11 $(LDFLAGS) -o $@ $< $(BUILD)/commands.o -L$(BUILD) -lforward -Wl,-rpath,'$$ORIGIN'
+build/linked: src/linked.c src/commands.c src/commands.h src/contracts.h build/libforward.so
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -o build/linked src/linked.c src/commands.c -Lbuild -lforward -Wl,-rpath,'$$ORIGIN'
 
-$(BUILD)/runtime: src/runtime.c $(BUILD)/commands.o
-	$(CC) $(CPPFLAGS) $(CFLAGS) $(WARNINGS) -std=c11 $(LDFLAGS) -o $@ $^ -ldl
+build/runtime: src/runtime.c src/commands.c src/commands.h src/contracts.h | build
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -o build/runtime src/runtime.c src/commands.c -ldl
