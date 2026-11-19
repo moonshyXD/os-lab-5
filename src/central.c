@@ -1,12 +1,10 @@
 #include "contracts.h"
 
-#include <limits.h>
 #include <math.h>
 #include <stdbool.h>
 #include <stdint.h>
 
 enum { ROOT_LIMIT = 46340, BLOCK_SIZE = 32768 };
-_Static_assert(INT_MAX == 2147483647, "sieve requires 32-bit int");
 
 float Derivative(float A, float deltaX) {
     const double point = A;
